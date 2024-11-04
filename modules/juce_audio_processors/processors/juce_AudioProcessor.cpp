@@ -1612,6 +1612,23 @@ void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue
     }
 }
 
+void AudioProcessorParameter::touchGestureBegun()
+{
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterTouchChanged (getParameterIndex(), true);
+}
+void AudioProcessorParameter::touchGestureEnded()
+{
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterTouchChanged (getParameterIndex(), false);
+}
+
 bool AudioProcessorParameter::isOrientationInverted() const                      { return false; }
 bool AudioProcessorParameter::isAutomatable() const                              { return true; }
 bool AudioProcessorParameter::isMetaParameter() const                            { return false; }
