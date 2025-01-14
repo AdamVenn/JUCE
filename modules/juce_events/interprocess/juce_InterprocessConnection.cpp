@@ -123,7 +123,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     return false;
 }
 
-bool InterprocessConnection::connectToPipe (const String& pipeName, int timeoutMs)
+bool InterprocessConnection::connectToPipe (const String& pipeName, int receiveTimeoutMs, int sendTimeoutMs)
 {
     disconnect();
 
@@ -132,7 +132,8 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, int timeoutM
     if (newPipe->openExisting (pipeName))
     {
         const ScopedWriteLock sl (pipeAndSocketLock);
-        pipeReceiveMessageTimeout = timeoutMs;
+        pipeReceiveMessageTimeout = receiveTimeoutMs;
+        pipeSendMessageTimeout = sendTimeoutMs;
         initialiseWithPipe (std::move (newPipe));
         return true;
     }
@@ -229,7 +230,7 @@ int InterprocessConnection::writeData (void* data, int dataSize)
         return socket->write (data, dataSize);
 
     if (pipe != nullptr)
-        return pipe->write (data, dataSize, pipeReceiveMessageTimeout);
+        return pipe->write (data, dataSize, pipeSendMessageTimeout);
 
     return 0;
 }
