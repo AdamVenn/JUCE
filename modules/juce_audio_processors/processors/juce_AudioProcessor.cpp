@@ -1536,6 +1536,17 @@ void AudioProcessorParameter::setValueNotifyingHost (float newValue)
     sendValueChangedMessageToListeners (newValue);
 }
 
+void AudioProcessorParameter::setValueNotifyingAllButHost(float newValue)
+{
+    setValue (newValue);
+    
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterValueChanged (getParameterIndex(), newValue);
+}
+
 void AudioProcessorParameter::beginChangeGesture()
 {
     // This method can't be used until the parameter has been attached to a processor!
@@ -1670,6 +1681,30 @@ void AudioProcessorParameter::removeListener (AudioProcessorParameter::Listener*
 {
     const ScopedLock sl (listenerLock);
     listeners.removeFirstMatchingValue (listenerToRemove);
+}
+
+std::optional<bool> AudioProcessorParameter::getTouchState()
+{
+    if (touchStateGetter)
+    {
+        return touchStateGetter(getParameterIndex());
+    }
+    else
+    {
+        return {};
+    }
+}
+
+Result AudioProcessorParameter::postCurrentValue(float newValue)
+{
+    if (currentValuePoster)
+    {
+        return currentValuePoster(getParameterIndex(), newValue);
+    }
+    else
+    {
+        return Result::fail("No post current value function available");
+    }
 }
 
 } // namespace juce
