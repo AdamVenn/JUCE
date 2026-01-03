@@ -115,10 +115,12 @@ public:
                                             to the pipe, or -1 for an infinite timeout.
         @param pipeSendMessageTimeoutMs     a timeout length to be used when writing
                                             to the pipe, or -1 for an infinite timeout.
+        @param pipeConnectMessageTimeoutMs  a timeout length to be used when connecting
+                                            to the pipe.
         @returns true if it connects successfully.
         @see createPipe, NamedPipe
     */
-    bool connectToPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, int pipeSendMessageTimeoutMs = 5);
+    bool connectToPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, int pipeSendMessageTimeoutMs = 5, int pipeConnectTimeoutMs = 200);
 
     /** Tries to create a new pipe for other processes to connect to.
 
@@ -129,10 +131,14 @@ public:
         @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading or writing
                                             to the pipe, or -1 for an infinite timeout
         @param mustNotExist   if set to true, the method will fail if the pipe already exists
+        @param pipeSendMessageTimeoutMs     a timeout length to be used when writing
+                                            to the pipe, or -1 for an infinite timeout.
+        @param pipeConnectMessageTimeoutMs  a timeout length to be used when connecting
+                                            to the pipe.
         @returns true if the pipe was created, or false if it fails (e.g. if another process is
                  already using the pipe)
     */
-    bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, bool mustNotExist = false);
+    bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, bool mustNotExist = false, int pipeSendMessageTimeoutMs = 5, int pipeConnectTimeoutMs = 200);
 
     /** Whether the disconnect call should trigger callbacks. */
     enum class Notify { no, yes };

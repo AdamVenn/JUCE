@@ -59,14 +59,14 @@ public:
     /** Tries to open a pipe that already exists.
         Returns true if it succeeds.
     */
-    bool openExisting (const String& pipeName);
+    bool openExisting (const String& pipeName, int connectionTimeoutMs = 200);
 
     /** Tries to create a new pipe.
         Returns true if it succeeds.
         If mustNotExist is true then it will fail if a pipe is already
         open with the same name.
     */
-    bool createNewPipe (const String& pipeName, bool mustNotExist = false);
+    bool createNewPipe (const String& pipeName, bool mustNotExist = false, int pipeConnectTimeoutMs = 200);
 
     /** Closes the pipe, if it's open. */
     void close();
@@ -104,7 +104,7 @@ private:
     String currentPipeName;
     ReadWriteLock lock;
 
-    bool openInternal (const String& pipeName, bool createPipe, bool mustNotExist);
+    bool openInternal (const String& pipeName, bool createPipe, bool mustNotExist, int connectionTimeoutMs);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NamedPipe)
 };
