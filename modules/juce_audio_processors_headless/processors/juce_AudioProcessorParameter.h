@@ -345,7 +345,7 @@ public:
         
         /** Indicates that a parameter change gesture has originated from an Avid control surface.
         */
-        virtual void parameterTouchChanged (int parameterIndex, bool isTouch) {}
+        virtual void parameterTouchChanged (int /*parameterIndex*/, bool /*isTouch*/) {}
     };
 
     /** @internal
