@@ -1458,6 +1458,23 @@ void AudioProcessor::ParameterChangeForwarder::parameterGestureChanged (int inde
             (l->*callback) (owner, index);
 }
 
+void AudioProcessorParameter::touchGestureBegun()
+{
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterTouchChanged (getParameterIndex(), true);
+}
+void AudioProcessorParameter::touchGestureEnded()
+{
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterTouchChanged (getParameterIndex(), false);
+}
+
 JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 } // namespace juce

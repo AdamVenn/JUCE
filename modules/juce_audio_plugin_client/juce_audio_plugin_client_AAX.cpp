@@ -1002,6 +1002,21 @@ namespace AAXClasses
             return result;
         }
 
+        AAX_Result UpdateParameterTouch ( AAX_CParamID iParameterID, AAX_CBoolean iTouchState ) override
+        {
+            if(auto* param = getParameterFromID(iParameterID))
+            {
+                if (iTouchState > 0) {
+                    param->touchGestureBegun();
+                }
+                else {
+                    param->touchGestureEnded();
+                }
+            }
+            
+            return AAX_CEffectParameters::UpdateParameterTouch(iParameterID, iTouchState);
+        }
+
         AAX_Result GetParameterValueFromString (AAX_CParamID paramID, double* result, const AAX_IString& text) const override
         {
             if (auto* param = getParameterFromID (paramID))
