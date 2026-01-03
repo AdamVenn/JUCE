@@ -111,12 +111,14 @@ public:
         to connect to.
 
         @param pipeName     the name to use for the pipe - this should be unique to your app
-        @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading or writing
+        @param pipeReceiveMessageTimeoutMs  a timeout length to be used when reading
+                                            to the pipe, or -1 for an infinite timeout.
+        @param pipeSendMessageTimeoutMs     a timeout length to be used when writing
                                             to the pipe, or -1 for an infinite timeout.
         @returns true if it connects successfully.
         @see createPipe, NamedPipe
     */
-    bool connectToPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs);
+    bool connectToPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, int pipeSendMessageTimeoutMs = 5);
 
     /** Tries to create a new pipe for other processes to connect to.
 
@@ -210,6 +212,7 @@ private:
     const bool useMessageThread;
     const uint32 magicMessageHeader;
     int pipeReceiveMessageTimeout = -1;
+    int pipeSendMessageTimeout = 5;
 
     friend class InterprocessConnectionServer;
     void initialise();
