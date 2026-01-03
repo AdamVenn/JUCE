@@ -155,6 +155,14 @@ public:
     */
     void endChangeGesture();
 
+    /** Calls the Listeners to let them know an Avid contol surface sent a 'touch token'
+    */
+    void touchGestureBegun();
+    
+    /** Calls the Listeners to let them know an Avid contol surface sent a 'touch token'
+    */
+    void touchGestureEnded();
+    
     /** This should return the default value for this parameter. */
     virtual float getDefaultValue() const = 0;
 
@@ -334,6 +342,10 @@ public:
             message thread.
         */
         virtual void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) = 0;
+        
+        /** Indicates that a parameter change gesture has originated from an Avid control surface.
+        */
+        virtual void parameterTouchChanged (int parameterIndex, bool isTouch) {}
     };
 
     /** @internal
