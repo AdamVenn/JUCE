@@ -1444,6 +1444,17 @@ void AudioProcessor::ParameterChangeForwarder::parameterValueChanged (int index,
             l->audioProcessorParameterChanged (owner, index, value);
 }
 
+void AudioProcessorParameter::setValueNotifyingAllButHost(float newValue)
+{
+    setValue (newValue);
+    
+    ScopedLock lock (listenerLock);
+
+    for (int i = owner->listeners.size(); --i >= 0;)
+        if (auto* l = owner->listeners[i])
+            l->parameterValueChanged (getParameterIndex(), newValue);
+}
+
 void AudioProcessor::ParameterChangeForwarder::parameterGestureChanged (int index, bool begin)
 {
     if (owner == nullptr)

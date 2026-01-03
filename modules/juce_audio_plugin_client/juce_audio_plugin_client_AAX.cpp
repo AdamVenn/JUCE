@@ -844,6 +844,7 @@ namespace AAXClasses
                 return err;
 
             addAudioProcessorParameters();
+            giveParametersTheirAaxFunctions();
 
             return AAX_SUCCESS;
         }
@@ -1310,6 +1311,48 @@ namespace AAXClasses
         {
             if (auto paramID = getAAXParamIDFromJuceIndex (parameterIndex))
                 ReleaseParameter (paramID);
+        }
+
+        Result PostCurrentValue(int juceParameterIndex, float val)
+        {
+            auto* delegate{ AutomationDelegate() };
+            if (!delegate) {
+                return Result::fail("No automation delegate");
+            }
+            
+            auto aaxParamId = getAAXParamIDFromJuceIndex(juceParameterIndex);
+            if (!aaxParamId) {
+                return Result::fail("Couldn't find AAX parameter");
+            }
+            
+            auto res = delegate->PostCurrentValue(aaxParamId, static_cast<double>(val));
+            if (res != AAX_SUCCESS) {
+                return Result::fail("Couldn't post current value");
+            }
+            
+            return Result::ok();
+        }
+        
+        std::optional<bool> GetTouchState(int juceParameterIndex)
+        {
+            auto* delegate{ AutomationDelegate() };
+            if (!delegate) {
+                return {};
+            }
+            
+            auto aaxParamId = getAAXParamIDFromJuceIndex(juceParameterIndex);
+            if (!aaxParamId) {
+                return {};
+            }
+            
+            AAX_CBoolean touchState{};
+            auto res = delegate->GetTouchState(aaxParamId, &touchState);
+            if (res != AAX_SUCCESS) {
+                jassertfalse;
+                return {};
+            }
+            
+            return touchState == static_cast<AAX_CBoolean>(true);
         }
 
         AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
@@ -1977,6 +2020,23 @@ namespace AAXClasses
                         chOffset += numChannels;
                     }
                 }
+            }
+        }
+        
+        void giveParametersTheirAaxFunctions()
+        {
+            auto& audioProcessor = getPluginInstance();
+            auto juceParameterArray{ audioProcessor.getParameters() };
+            for (auto* param : juceParameters)
+            {
+                param->touchStateGetter = [&](int paramIdx)
+                {
+                    return GetTouchState(paramIdx);
+                };
+                param->currentValuePoster = [&](int paramIdx, float newValue)
+                {
+                    return PostCurrentValue(paramIdx, newValue);
+                };
             }
         }
 
