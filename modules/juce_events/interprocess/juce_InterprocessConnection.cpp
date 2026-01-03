@@ -123,13 +123,13 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     return false;
 }
 
-bool InterprocessConnection::connectToPipe (const String& pipeName, int receiveTimeoutMs, int sendTimeoutMs)
+bool InterprocessConnection::connectToPipe (const String& pipeName, int receiveTimeoutMs, int sendTimeoutMs, int pipeConnectTimeoutMs)
 {
     disconnect();
 
     auto newPipe = std::make_unique<NamedPipe>();
 
-    if (newPipe->openExisting (pipeName))
+    if (newPipe->openExisting (pipeName, pipeConnectTimeoutMs))
     {
         const ScopedWriteLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = receiveTimeoutMs;
@@ -141,16 +141,17 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, int receiveT
     return false;
 }
 
-bool InterprocessConnection::createPipe (const String& pipeName, int timeoutMs, bool mustNotExist)
+bool InterprocessConnection::createPipe (const String& pipeName, int receiveTimeoutMs, bool mustNotExist, int sendTimeoutMs, int pipeConnectTimeoutMs)
 {
     disconnect();
 
     auto newPipe = std::make_unique<NamedPipe>();
 
-    if (newPipe->createNewPipe (pipeName, mustNotExist))
+    if (newPipe->createNewPipe (pipeName, mustNotExist, pipeConnectTimeoutMs))
     {
         const ScopedWriteLock sl (pipeAndSocketLock);
-        pipeReceiveMessageTimeout = timeoutMs;
+        pipeReceiveMessageTimeout = receiveTimeoutMs;
+        pipeSendMessageTimeout = sendTimeoutMs;
         initialiseWithPipe (std::move (newPipe));
         return true;
     }

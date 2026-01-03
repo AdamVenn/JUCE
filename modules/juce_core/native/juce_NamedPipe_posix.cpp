@@ -63,6 +63,8 @@ public:
 
     bool connect (int timeOutMilliseconds)
     {
+        // Timeout should be in the future
+        jassert(timeOutMilliseconds >= 0);
         return openPipe (true, getTimeoutEnd (timeOutMilliseconds)) != invalidPipe;
     }
 
@@ -276,7 +278,7 @@ void NamedPipe::close()
     }
 }
 
-bool NamedPipe::openInternal (const String& pipeName, bool createPipe, bool mustNotExist)
+bool NamedPipe::openInternal (const String& pipeName, bool createPipe, bool mustNotExist, int connectionTimeoutMs)
 {
    #if JUCE_IOS
     pimpl.reset (new Pimpl (File::getSpecialLocation (File::tempDirectory)
@@ -296,7 +298,7 @@ bool NamedPipe::openInternal (const String& pipeName, bool createPipe, bool must
         return false;
     }
 
-    if (! pimpl->connect (200))
+    if (! pimpl->connect (connectionTimeoutMs))
     {
         pimpl.reset();
         return false;

@@ -44,13 +44,13 @@ NamedPipe::~NamedPipe()
     close();
 }
 
-bool NamedPipe::openExisting (const String& pipeName)
+bool NamedPipe::openExisting (const String& pipeName, int connectionTimeoutMs)
 {
     close();
 
     ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
-    return openInternal (pipeName, false, false);
+    return openInternal (pipeName, false, false, connectionTimeoutMs);
 }
 
 bool NamedPipe::isOpen() const
@@ -59,13 +59,13 @@ bool NamedPipe::isOpen() const
     return pimpl != nullptr;
 }
 
-bool NamedPipe::createNewPipe (const String& pipeName, bool mustNotExist)
+bool NamedPipe::createNewPipe (const String& pipeName, bool mustNotExist, int connectionTimeoutMs)
 {
     close();
 
     ScopedWriteLock sl (lock);
     currentPipeName = pipeName;
-    return openInternal (pipeName, true, mustNotExist);
+    return openInternal (pipeName, true, mustNotExist, connectionTimeoutMs);
 }
 
 String NamedPipe::getName() const
