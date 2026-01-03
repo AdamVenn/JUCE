@@ -784,7 +784,7 @@ namespace AAXClasses
         JuceAAX_Processor()
             : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_AAX))
         {
-            inParameterChangedCallback = false;
+            inParameterChangedCallback = INT_MAX;
 
             pluginInstance->setPlayHead (this);
             pluginInstance->addListener (this);
@@ -981,7 +981,7 @@ namespace AAXClasses
                 {
                     param->setValue (newValue);
 
-                    inParameterChangedCallback = true;
+                    inParameterChangedCallback = param->getParameterIndex();
                     param->sendValueChangedMessageToListeners (newValue);
                 }
             }
@@ -1273,12 +1273,11 @@ namespace AAXClasses
 
         void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
         {
-            if (inParameterChangedCallback.get())
+            if (inParameterChangedCallback.get() == parameterIndex)
             {
-                inParameterChangedCallback = false;
+                inParameterChangedCallback = INT_MAX;
                 return;
             }
-
             if (auto paramID = getAAXParamIDFromJuceIndex (parameterIndex))
                 SetParameterNormalizedValue (paramID, (double) newValue);
         }
@@ -2323,7 +2322,7 @@ namespace AAXClasses
         mutable ThreadLocalValue<ChunkMemoryBlock> perThreadFilterData;
         CriticalSection perThreadDataLock;
 
-        ThreadLocalValue<bool> inParameterChangedCallback;
+        ThreadLocalValue<int> inParameterChangedCallback;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
     };
