@@ -112,6 +112,12 @@ public:
     */
     virtual float getValue() const = 0;
 
+    /** Query Pro Tools to find out if the parameter is currently being manipulated by the user
+        (i.e. not by automation)
+    */
+    virtual std::optional<bool> getTouchState();
+    std::function<std::optional<bool>(int /* paramIdx */ )> touchStateGetter;
+    
     /** The host will call this method to change the value of a parameter.
 
         The host may call this at any time, including during the audio processing
@@ -140,6 +146,15 @@ public:
     */
     void setValueNotifyingHost (float newValue);
 
+    /** A processor should call this when updating its value internally.
+    */
+    void setValueNotifyingAllButHost (float newValue);
+
+    /** A processor should call this to let an AAX host know a linked parameter has had its value changed.
+    */
+    virtual Result postCurrentValue(float newValue);
+    std::function<Result(int /* paramIdx */, float /* newValue */)> currentValuePoster;
+    
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
         This allows the host to know when a parameter is actively being held by the user, and
@@ -155,11 +170,11 @@ public:
     */
     void endChangeGesture();
 
-    /** Calls the Listeners to let them know an Avid contol surface sent a 'touch token'
+    /** Called by the AAX host, lets listeners know a control is locked for updates
     */
     void touchGestureBegun();
     
-    /** Calls the Listeners to let them know an Avid contol surface sent a 'touch token'
+    /** Called by the AAX host, lets listeners know a control is available for updates.
     */
     void touchGestureEnded();
     
